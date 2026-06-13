@@ -42,7 +42,7 @@ ver uma solucao guiada quando travar e repetir ate a sintaxe ficar natural.
 
 Baixe o instalador na pagina de GitHub Releases do projeto.
 
-- Windows: use o instalador `.msi` ou `.exe`.
+- Windows: use o instalador `.exe`.
 - macOS: use o `.dmg` ou `.app.tar.gz`.
 - Linux: use `.AppImage`, `.deb` ou `.rpm`, conforme o artefato gerado.
 
@@ -85,12 +85,17 @@ Para usar o desktop:
 
 1. Baixe o instalador em GitHub Releases.
 2. Instale e abra `Rust Training`.
-3. Para validar compilacao, instale Rust:
+3. Se `rustc` nao estiver instalado, o instalador `.exe` pergunta se voce quer instalar Rust automaticamente usando `winget`.
+4. Para instalar Rust manualmente:
 
 ```powershell
 winget install --id Rustlang.Rustup
 rustup default stable-msvc
 ```
+
+O instalador automatico e opcional. Se o usuario recusar, o app ainda abre e
+mostra os exercicios; apenas a validacao de compilacao fica indisponivel ate o
+Rust ser instalado.
 
 Para desenvolver ou gerar instalador localmente, instale tambem Microsoft C++
 Build Tools e WebView2 quando o sistema ainda nao tiver. O Tauri usa WebView2
@@ -222,7 +227,7 @@ Antes de publicar um MVP:
 - Rodar `cargo test --workspace`.
 - Rodar `cargo check -p rust-training-tauri`.
 - Rodar `cargo publish --dry-run`.
-- Criar tag `vX.Y.Z`.
+- Criar tag `vX.Y.Z` somente quando a release for intencional.
 - Conferir os artifacts do workflow de release.
 - Revisar a GitHub Release gerada com texto curto, screenshots e links de instalacao.
 
