@@ -8,7 +8,7 @@ title: Mover uma String
 difficulty: Beginner
 compile_mode: SnippetAsMain
 ```prompt
-Crie nome como String e mova sua posse para atual.
+Crie uma String e mova sua posse para outra variavel.
 ```
 ```summary
 String nao implementa Copy. Atribuir uma String a outra variavel move a posse.
@@ -28,7 +28,7 @@ let atual = nome;
 - [The Rust Book: Move](https://doc.rust-lang.org/book/ch04-01-what-is-ownership.html#variables-and-data-interacting-with-move)
 ### Rules
 - required_ast|string-from|HasCallPath|String::from|Criou uma String.|Esperava criar uma String.
-- required_pattern|move|let\s+atual\s*=\s*nome\s*;|Moveu a posse para outra variavel.|Esperava mover nome para atual.
+- required_ast|move|HasLetInitializerWithAnyPath|Moveu a posse para outra variavel.|Esperava uma variavel recebendo outra por atribuicao.
 
 ## ownership-clone-string
 module_id: ownership-borrowing
@@ -65,7 +65,7 @@ title: Mostrar que i32 e Copy
 difficulty: Beginner
 compile_mode: SnippetAsMain
 ```prompt
-Crie a = 10, copie para b e depois calcule soma usando a e b.
+Crie um inteiro, copie para outra variavel e depois calcule uma soma usando os dois valores.
 ```
 ```summary
 Tipos simples como i32 implementam Copy. A atribuicao copia bits em vez de mover posse.
@@ -84,7 +84,7 @@ let soma = a + b;
 ### Docs
 - [The Rust Book: Copy](https://doc.rust-lang.org/book/ch04-01-what-is-ownership.html#stack-only-data-copy)
 ### Rules
-- required_pattern|copy|let\s+b\s*=\s*a\s*;|Copiou o inteiro.|Esperava copiar a para b.
+- required_ast|copy|HasLetInitializerWithAnyPath|Copiou um inteiro para outra variavel.|Esperava uma variavel recebendo outra por atribuicao.
 - required_ast|soma|HasBinaryAdd|Usou os dois valores.|Esperava combinar a e b.
 
 ## fn-toma-posse-string
@@ -247,7 +247,7 @@ numeros.push(4);
 ### Rules
 - required_ast|let-mut|HasLetMut|Criou Vec mutavel.|Esperava let mut.
 - required_ast|push|HasMethodCall|push|Mutou depois do emprestimo.|Esperava inserir depois.
-- required_pattern|escopo|\{\s*let\s+primeiro\s*=\s*&\s*numeros\s*\[0\]|Usou escopo para referencia.|Esperava limitar o emprestimo.
+- required_pattern|escopo|\{\s*let\s+(?:[A-Za-z][A-Za-z0-9_]*|_[A-Za-z0-9_]+)\s*=\s*&\s*numeros\s*\[0\]|Usou escopo para referencia.|Esperava limitar o emprestimo em um bloco.
 
 ## vec-borrow-then-push
 module_id: ownership-borrowing

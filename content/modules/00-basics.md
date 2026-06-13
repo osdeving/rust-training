@@ -8,13 +8,13 @@ title: Criar variavel imutavel
 difficulty: Beginner
 compile_mode: SnippetAsMain
 ```prompt
-Crie uma variavel resposta com o valor 42 sem usar mut.
+Crie uma variavel imutavel com o valor 42 sem usar mut.
 ```
 ```summary
 Por padrao, variaveis em Rust sao imutaveis.
 ```
 ```solution
-let resposta = 42;
+let valor = 42;
 ```
 ### Hints
 - Use let simples.
@@ -25,7 +25,7 @@ let resposta = 42;
 ### Docs
 - [The Rust Book: Variables](https://doc.rust-lang.org/book/ch03-01-variables-and-mutability.html)
 ### Rules
-- required_pattern|let|let\s+resposta\s*=|Criou variavel resposta.|Esperava let resposta.
+- required_ast|let|HasLetInitializerWithInt|42|Criou variavel com valor 42.|Esperava declarar uma variavel com let e valor 42.
 - forbidden_ast|sem-mut|HasLetMut|Nao usou mut.|Nao use mut neste exercicio.
 
 ## let-mut
@@ -89,7 +89,7 @@ title: Anotar tipo explicitamente
 difficulty: Beginner
 compile_mode: SnippetAsMain
 ```prompt
-Crie idade com tipo u8 e valor 30.
+Crie uma variavel com tipo u8 e valor 30.
 ```
 ```summary
 Anotacoes de tipo ajudam quando a inferencia nao e suficiente ou quando queremos deixar a intencao clara.
@@ -107,7 +107,7 @@ let idade: u8 = 30;
 - [The Rust Book: Data types](https://doc.rust-lang.org/book/ch03-02-data-types.html)
 ### Rules
 - required_ast|tipo|HasLetType|u8|Anotou tipo u8.|Esperava anotacao u8.
-- required_pattern|idade|let\s+idade\s*:\s*u8\s*=\s*30|Criou idade tipada.|Esperava idade: u8.
+- required_ast|valor|HasLetInitializerWithInt|30|Inicializou com valor 30.|Esperava uma variavel inicializada com 30.
 
 ## const-basic
 module_id: basics
@@ -134,7 +134,7 @@ let tamanho = LIMITE;
 - [The Rust Book: Constants](https://doc.rust-lang.org/book/ch03-01-variables-and-mutability.html#constants)
 ### Rules
 - required_pattern|const|const\s+LIMITE\s*:\s*usize\s*=\s*10|Declarou constante.|Esperava const LIMITE.
-- required_pattern|uso|let\s+tamanho\s*=\s*LIMITE|Usou a constante.|Esperava usar LIMITE.
+- required_ast|uso|HasLetInitializerWithPath|LIMITE|Usou a constante.|Esperava usar LIMITE em uma variavel.
 
 ## numeric-types
 module_id: basics

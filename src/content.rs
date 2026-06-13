@@ -473,6 +473,41 @@ fn parse_ast_check(args: &[&str]) -> Result<AstCheck, ContentError> {
         .ok_or_else(|| ContentError::new("required_ast sem check"))?;
 
     Ok(match *name {
+        "HasLetInitializer" => AstCheck::HasLetInitializer,
+        "HasLetInitializerWithInt" => AstCheck::HasLetInitializerWithInt(
+            required_arg(args, 1)?
+                .parse::<u128>()
+                .map_err(|error| ContentError::new(error.to_string()))?,
+        ),
+        "HasLetInitializerWithPath" => {
+            AstCheck::HasLetInitializerWithPath(required_arg(args, 1)?.to_string())
+        }
+        "HasLetInitializerWithAnyPath" => AstCheck::HasLetInitializerWithAnyPath,
+        "HasLetInitializerWithCallPath" => {
+            AstCheck::HasLetInitializerWithCallPath(required_arg(args, 1)?.to_string())
+        }
+        "HasLetInitializerWithCallPathWithIntArg" => {
+            AstCheck::HasLetInitializerWithCallPathWithIntArg {
+                path: required_arg(args, 1)?.to_string(),
+                arg: required_arg(args, 2)?
+                    .parse::<u128>()
+                    .map_err(|error| ContentError::new(error.to_string()))?,
+            }
+        }
+        "HasLetInitializerWithDeref" => AstCheck::HasLetInitializerWithDeref,
+        "HasLetInitializerWithDerefPath" => {
+            AstCheck::HasLetInitializerWithDerefPath(required_arg(args, 1)?.to_string())
+        }
+        "HasLetInitializerWithIf" => AstCheck::HasLetInitializerWithIf,
+        "HasStructPatternField" => AstCheck::HasStructPatternField {
+            path: required_arg(args, 1)?.to_string(),
+            field: required_arg(args, 2)?.to_string(),
+        },
+        "HasTuplePatternBindingCount" => AstCheck::HasTuplePatternBindingCount {
+            count: required_arg(args, 1)?
+                .parse::<usize>()
+                .map_err(|error| ContentError::new(error.to_string()))?,
+        },
         "HasLetMut" => AstCheck::HasLetMut,
         "HasLetType" => AstCheck::HasLetType(required_arg(args, 1)?.to_string()),
         "HasCallPath" => AstCheck::HasCallPath(required_arg(args, 1)?.to_string()),
@@ -487,8 +522,10 @@ fn parse_ast_check(args: &[&str]) -> Result<AstCheck, ContentError> {
         "HasForLoop" => AstCheck::HasForLoop,
         "HasForLoopByReference" => AstCheck::HasForLoopByReference,
         "HasWhileLoop" => AstCheck::HasWhileLoop,
+        "HasWhileLetSome" => AstCheck::HasWhileLetSome,
         "HasLoop" => AstCheck::HasLoop,
         "HasIf" => AstCheck::HasIf,
+        "HasIfLetSome" => AstCheck::HasIfLetSome,
         "HasMatch" => AstCheck::HasMatch,
         "HasFunction" => AstCheck::HasFunction,
         "HasFunctionParamCount" => AstCheck::HasFunctionParamCount {

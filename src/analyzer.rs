@@ -107,6 +107,32 @@ fn evaluate_ast_rule(
 
 fn evaluate_ast_check(check: &AstCheck, facts: &AstFacts) -> (bool, Option<String>) {
     match check {
+        AstCheck::HasLetInitializer => (facts.has_let_initializer(), None),
+        AstCheck::HasLetInitializerWithInt(value) => {
+            (facts.has_let_initializer_with_int(*value), None)
+        }
+        AstCheck::HasLetInitializerWithPath(path) => {
+            (facts.has_let_initializer_with_path(path), None)
+        }
+        AstCheck::HasLetInitializerWithAnyPath => (facts.has_let_initializer_with_any_path(), None),
+        AstCheck::HasLetInitializerWithCallPath(path) => {
+            (facts.has_let_initializer_with_call_path(path), None)
+        }
+        AstCheck::HasLetInitializerWithCallPathWithIntArg { path, arg } => (
+            facts.has_let_initializer_with_call_path_and_int_arg(path, *arg),
+            None,
+        ),
+        AstCheck::HasLetInitializerWithDeref => (facts.has_let_initializer_with_deref(), None),
+        AstCheck::HasLetInitializerWithDerefPath(path) => {
+            (facts.has_let_initializer_with_deref_path(path), None)
+        }
+        AstCheck::HasLetInitializerWithIf => (facts.has_let_initializer_with_if(), None),
+        AstCheck::HasStructPatternField { path, field } => {
+            (facts.has_struct_pattern_field(path, field), None)
+        }
+        AstCheck::HasTuplePatternBindingCount { count } => {
+            (facts.has_tuple_pattern_binding_count(*count), None)
+        }
         AstCheck::HasLetMut => (facts.has_let_mut(), None),
         AstCheck::HasLetType(type_name) => (facts.has_let_type(type_name), None),
         AstCheck::HasCallPath(path) => (facts.has_call_path(path), None),
@@ -118,8 +144,10 @@ fn evaluate_ast_check(check: &AstCheck, facts: &AstFacts) -> (bool, Option<Strin
         AstCheck::HasForLoop => (facts.has_for_loop(), None),
         AstCheck::HasForLoopByReference => (facts.has_for_loop_by_reference(), None),
         AstCheck::HasWhileLoop => (facts.has_while_loop(), None),
+        AstCheck::HasWhileLetSome => (facts.has_while_let_some(), None),
         AstCheck::HasLoop => (facts.has_loop(), None),
         AstCheck::HasIf => (facts.has_if(), None),
+        AstCheck::HasIfLetSome => (facts.has_if_let_some(), None),
         AstCheck::HasMatch => (facts.has_match(), None),
         AstCheck::HasFunction => (facts.has_function(), None),
         AstCheck::HasFunctionParamCount { min } => (facts.has_function_param_count(*min), None),
@@ -256,5 +284,54 @@ xs.push(7);
 
         assert!(!report.passed);
         assert!(report.compile.is_some_and(|compile| !compile.ok));
+    }
+
+    #[test]
+    fn accepts_arbitrary_binding_name_when_name_is_not_the_lesson() {
+        let exercise = find_exercise("let-imutavel").expect("exercise should exist");
+        let report = evaluate(&exercise, "let qualquer_nome = 42;");
+
+        assert!(report.passed, "{report:#?}");
+    }
+
+    #[test]
+    fn rejects_wildcard_when_exercise_requires_a_binding() {
+        let exercise = find_exercise("let-imutavel").expect("exercise should exist");
+        let report = evaluate(&exercise, "let _ = 42;");
+
+        assert!(!report.passed);
+        assert!(
+            report
+                .checks
+                .iter()
+                .any(|check| check.id == "let" && !check.ok)
+        );
+    }
+
+    #[test]
+    fn accepts_if_let_with_arbitrary_binding_name() {
+        let exercise = find_exercise("if-let-option").expect("exercise should exist");
+        let answer = "\
+let valor = Some(3);
+let mut dobro = 0;
+if let Some(outro_nome) = valor {
+    dobro = outro_nome * 2;
+}
+";
+
+        let report = evaluate(&exercise, answer);
+
+        assert!(report.passed, "{report:#?}");
+    }
+
+    #[test]
+    fn accepts_tuple_destructure_with_arbitrary_binding_names() {
+        let exercise = find_exercise("tuple-destructure").expect("exercise should exist");
+        let report = evaluate(
+            &exercise,
+            "let ponto = (10, 20);\nlet (coluna, linha) = ponto;",
+        );
+
+        assert!(report.passed, "{report:#?}");
     }
 }

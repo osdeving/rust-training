@@ -8,7 +8,7 @@ title: Guardar valor no heap com Box
 difficulty: Intermediate
 compile_mode: SnippetAsMain
 ```prompt
-Crie numero usando Box::new(42) e depois leia o valor com *numero.
+Crie um Box com Box::new(42) e depois leia o valor usando desreferencia.
 ```
 ```summary
 Box<T> guarda um valor no heap e deixa um ponteiro possuidor na stack.
@@ -27,7 +27,7 @@ let valor = *numero;
 - [The Rust Book: Box<T>](https://doc.rust-lang.org/book/ch15-01-box.html)
 ### Rules
 - required_ast|box-new|HasCallPath|Box::new|Criou Box.|Esperava Box::new.
-- required_pattern|deref|let\s+valor\s*=\s*\*\s*numero|Desreferenciou Box.|Esperava ler com *numero.
+- required_ast|deref|HasLetInitializerWithDeref|Desreferenciou Box.|Esperava guardar o valor lido com *.
 
 ## box-recursive-enum
 module_id: smart-pointers

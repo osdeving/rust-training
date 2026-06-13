@@ -8,7 +8,7 @@ title: Desestruturar tupla
 difficulty: Beginner
 compile_mode: SnippetAsMain
 ```prompt
-Dado ponto, desestruture a tupla em x e y.
+Dado ponto, desestruture a tupla em duas variaveis.
 ```
 ```scaffold
 let ponto = (10, 20);
@@ -29,7 +29,7 @@ let (x, y) = ponto;
 ### Docs
 - [The Rust Book: Tuple type](https://doc.rust-lang.org/book/ch03-02-data-types.html#the-tuple-type)
 ### Rules
-- required_pattern|destructure|let\s*\(\s*x\s*,\s*y\s*\)\s*=|Desestruturou a tupla.|Esperava desestruturar em x e y.
+- required_ast|destructure|HasTuplePatternBindingCount|2|Desestruturou a tupla.|Esperava desestruturar em duas variaveis.
 
 ## tuple-access
 module_id: tuples-structs-enums
@@ -314,7 +314,7 @@ title: Desestruturar struct
 difficulty: Intermediate
 compile_mode: SnippetAsMain
 ```prompt
-Declare Ponto { x: i32, y: i32 }, crie um ponto e desestruture em x e y.
+Declare Ponto { x: i32, y: i32 }, crie um ponto e desestruture seus campos.
 ```
 ```summary
 Structs tambem podem ser desestruturadas por nome de campo.
@@ -338,4 +338,5 @@ let Ponto { x, y } = ponto;
 - [The Rust Book: Patterns with structs](https://doc.rust-lang.org/book/ch19-03-pattern-syntax.html#destructuring-structs)
 ### Rules
 - required_pattern|struct|struct\s+Ponto\s*\{|Declarou Ponto.|Esperava struct Ponto.
-- required_pattern|destructure|let\s+Ponto\s*\{\s*x\s*,\s*y\s*\}\s*=|Desestruturou por campos.|Esperava desestruturar Ponto.
+- required_ast|destructure-x|HasStructPatternField|Ponto|x|Desestruturou campo x.|Esperava desestruturar Ponto com x.
+- required_ast|destructure-y|HasStructPatternField|Ponto|y|Desestruturou campo y.|Esperava desestruturar Ponto com y.

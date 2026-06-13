@@ -106,7 +106,7 @@ fn main() {
 - [The Rust Book: use keyword](https://doc.rust-lang.org/book/ch07-04-bringing-paths-into-scope-with-the-use-keyword.html)
 ### Rules
 - required_pattern|use|use\s+calculos::triplo\s*;|Importou caminho.|Esperava use calculos::triplo.
-- required_pattern|chamada|let\s+valor\s*=\s*triplo\s*\(3\)|Chamou item importado.|Esperava triplo(3).
+- required_ast|chamada|HasLetInitializerWithCallPathWithIntArg|triplo|3|Chamou item importado.|Esperava guardar o resultado de triplo(3).
 
 ## pub-function
 module_id: modules-crates

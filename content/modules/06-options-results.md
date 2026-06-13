@@ -70,7 +70,7 @@ title: Desestruturar Some com if let
 difficulty: Intermediate
 compile_mode: SnippetAsMain
 ```prompt
-Use if let Some(nome) = usuario para preencher saudacao quando houver nome.
+Use if let Some(...) = usuario para preencher saudacao quando houver nome.
 ```
 ```scaffold
 let usuario = Some("Ana");
@@ -95,6 +95,5 @@ if let Some(nome) = usuario {
 ### Docs
 - [The Rust Book: if let](https://doc.rust-lang.org/book/ch06-03-if-let.html)
 ### Rules
-- required_ast|if|HasIf|Usou if let.|Esperava if let.
-- required_pattern|if-let|if\s+let\s+Some\s*\(|Desestruturou Some.|Esperava if let Some(...).
+- required_ast|if-let|HasIfLetSome|Desestruturou Some.|Esperava if let Some(...).
 - required_ast|format|HasMacroCall|format|Usou format!.|Esperava format!.

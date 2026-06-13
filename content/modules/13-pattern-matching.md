@@ -78,7 +78,7 @@ title: Tratar Some com if let
 difficulty: Beginner
 compile_mode: SnippetAsMain
 ```prompt
-Dado valor = Some(3), crie dobro com if let Some(n) = valor.
+Dado valor = Some(3), trate o caso presente com if let Some(...).
 ```
 ```summary
 if let simplifica quando voce quer tratar um padrao principal e ignorar o resto.
@@ -99,7 +99,7 @@ if let Some(n) = valor {
 ### Docs
 - [The Rust Book: if let](https://doc.rust-lang.org/book/ch06-03-if-let.html)
 ### Rules
-- required_pattern|if-let|if\s+let\s+Some\s*\(\s*n\s*\)\s*=|Usou if let Some.|Esperava if let.
+- required_ast|if-let|HasIfLetSome|Usou if let Some.|Esperava if let Some(...).
 - required_ast|mut|HasLetMut|Criou destino mutavel.|Esperava let mut.
 
 ## while-let-pop
@@ -108,7 +108,7 @@ title: Consumir Vec com while let
 difficulty: Intermediate
 compile_mode: SnippetAsMain
 ```prompt
-Dado pilha, some os valores removendo com while let Some(n) = pilha.pop().
+Dado pilha, some os valores removendo com while let Some(...) = pilha.pop().
 ```
 ```scaffold
 let mut pilha = vec![1, 2, 3];
@@ -132,7 +132,7 @@ while let Some(n) = pilha.pop() {
 ### Docs
 - [The Rust Book: while let](https://doc.rust-lang.org/book/ch19-03-pattern-syntax.html#conditional-while-let-loops)
 ### Rules
-- required_pattern|while-let|while\s+let\s+Some\s*\(\s*n\s*\)\s*=|Usou while let.|Esperava while let Some.
+- required_ast|while-let|HasWhileLetSome|Usou while let Some.|Esperava while let Some(...).
 - required_ast|pop|HasMethodCall|pop|Removeu itens.|Esperava pop.
 - required_ast|mut|HasLetMut|Usou mutabilidade.|Esperava let mut.
 

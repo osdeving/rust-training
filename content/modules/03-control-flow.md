@@ -8,7 +8,7 @@ title: Classificar paridade com if/else
 difficulty: Beginner
 compile_mode: SnippetAsMain
 ```prompt
-Crie uma variavel rotulo que receba "par" se numero for par e "impar" caso contrario.
+Crie uma variavel que receba "par" se numero for par e "impar" caso contrario.
 ```
 ```scaffold
 let numero = 8;
@@ -31,7 +31,7 @@ let rotulo = if numero % 2 == 0 { "par" } else { "impar" };
 ### Rules
 - required_ast|if|HasIf|Usou if/else.|Esperava uma expressao if/else.
 - required_pattern|modulo|%\s*2\s*==\s*0|Testou divisibilidade por 2.|Esperava testar numero % 2 == 0.
-- required_pattern|rotulo|let\s+rotulo\s*=|Criou a variavel rotulo.|Esperava let rotulo = ...
+- required_ast|resultado|HasLetInitializerWithIf|Guardou o resultado do if.|Esperava uma variavel recebendo a expressao if.
 
 ## match-option
 module_id: control-flow

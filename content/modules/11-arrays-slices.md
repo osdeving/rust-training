@@ -207,7 +207,7 @@ title: Dividir slice com split_at
 difficulty: Intermediate
 compile_mode: SnippetAsMain
 ```prompt
-Dado numeros, use split_at(2) para criar esquerda e direita.
+Dado numeros, use split_at(2) para criar duas fatias.
 ```
 ```scaffold
 let numeros = [1, 2, 3, 4];
@@ -229,4 +229,4 @@ let (esquerda, direita) = numeros.split_at(2);
 - [slice::split_at](https://doc.rust-lang.org/std/primitive.slice.html#method.split_at)
 ### Rules
 - required_ast|split-at|HasMethodCall|split_at|Dividiu o slice.|Esperava usar split_at.
-- required_pattern|tupla|let\s*\(\s*esquerda\s*,\s*direita\s*\)|Desestruturou retorno.|Esperava receber duas fatias.
+- required_ast|tupla|HasTuplePatternBindingCount|2|Desestruturou retorno.|Esperava receber duas fatias.

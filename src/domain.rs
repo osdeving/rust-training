@@ -94,6 +94,17 @@ pub enum RuleKind {
 
 #[derive(Debug, Clone)]
 pub enum AstCheck {
+    HasLetInitializer,
+    HasLetInitializerWithInt(u128),
+    HasLetInitializerWithPath(String),
+    HasLetInitializerWithAnyPath,
+    HasLetInitializerWithCallPath(String),
+    HasLetInitializerWithCallPathWithIntArg { path: String, arg: u128 },
+    HasLetInitializerWithDeref,
+    HasLetInitializerWithDerefPath(String),
+    HasLetInitializerWithIf,
+    HasStructPatternField { path: String, field: String },
+    HasTuplePatternBindingCount { count: usize },
     HasLetMut,
     HasLetType(String),
     HasCallPath(String),
@@ -103,8 +114,10 @@ pub enum AstCheck {
     HasForLoop,
     HasForLoopByReference,
     HasWhileLoop,
+    HasWhileLetSome,
     HasLoop,
     HasIf,
+    HasIfLetSome,
     HasMatch,
     HasFunction,
     HasFunctionParamCount { min: usize },

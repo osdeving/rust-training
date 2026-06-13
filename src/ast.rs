@@ -1,13 +1,23 @@
 use syn::visit::{self, Visit};
 use syn::{
     Expr, ExprBinary, ExprCall, ExprForLoop, ExprIf, ExprLit, ExprLoop, ExprMatch, ExprMethodCall,
-    ExprWhile, File, ItemFn, Lit, Local, Macro, Pat, Path, ReturnType, Type,
+    ExprUnary, ExprWhile, File, ItemFn, Lit, Local, Macro, Member, Pat, Path, ReturnType, Type,
+    UnOp,
 };
 
 use crate::domain::CompileMode;
 
 #[derive(Debug, Clone, Default)]
 pub struct AstFacts {
+    let_initializer_count: usize,
+    let_initializer_int_values: Vec<u128>,
+    let_initializer_paths: Vec<String>,
+    let_initializer_call_paths: Vec<String>,
+    let_initializer_call_paths_with_int_args: Vec<(String, u128)>,
+    let_initializer_deref_paths: Vec<String>,
+    let_initializer_if_count: usize,
+    struct_pattern_fields: Vec<(String, String)>,
+    tuple_pattern_binding_counts: Vec<usize>,
     let_mut_count: usize,
     let_type_names: Vec<String>,
     call_paths: Vec<String>,
@@ -17,8 +27,10 @@ pub struct AstFacts {
     for_loop_count: usize,
     for_loop_by_reference_count: usize,
     while_loop_count: usize,
+    while_let_some_count: usize,
     loop_count: usize,
     if_count: usize,
+    if_let_some_count: usize,
     match_count: usize,
     function_count: usize,
     function_param_counts: Vec<usize>,
@@ -45,6 +57,64 @@ impl AstAnalysis {
 impl AstFacts {
     pub fn has_let_mut(&self) -> bool {
         self.let_mut_count > 0
+    }
+
+    pub fn has_let_initializer(&self) -> bool {
+        self.let_initializer_count > 0
+    }
+
+    pub fn has_let_initializer_with_int(&self, value: u128) -> bool {
+        self.let_initializer_int_values
+            .iter()
+            .any(|current| *current == value)
+    }
+
+    pub fn has_let_initializer_with_path(&self, path: &str) -> bool {
+        self.let_initializer_paths
+            .iter()
+            .any(|current| current == path)
+    }
+
+    pub fn has_let_initializer_with_any_path(&self) -> bool {
+        !self.let_initializer_paths.is_empty()
+    }
+
+    pub fn has_let_initializer_with_call_path(&self, path: &str) -> bool {
+        self.let_initializer_call_paths
+            .iter()
+            .any(|current| current == path)
+    }
+
+    pub fn has_let_initializer_with_call_path_and_int_arg(&self, path: &str, arg: u128) -> bool {
+        self.let_initializer_call_paths_with_int_args
+            .iter()
+            .any(|(current_path, current_arg)| current_path == path && *current_arg == arg)
+    }
+
+    pub fn has_let_initializer_with_deref(&self) -> bool {
+        !self.let_initializer_deref_paths.is_empty()
+    }
+
+    pub fn has_let_initializer_with_deref_path(&self, path: &str) -> bool {
+        self.let_initializer_deref_paths
+            .iter()
+            .any(|current| current == path)
+    }
+
+    pub fn has_let_initializer_with_if(&self) -> bool {
+        self.let_initializer_if_count > 0
+    }
+
+    pub fn has_struct_pattern_field(&self, path: &str, field: &str) -> bool {
+        self.struct_pattern_fields
+            .iter()
+            .any(|(current_path, current_field)| current_path == path && current_field == field)
+    }
+
+    pub fn has_tuple_pattern_binding_count(&self, count: usize) -> bool {
+        self.tuple_pattern_binding_counts
+            .iter()
+            .any(|current| *current == count)
     }
 
     pub fn has_let_type(&self, type_name: &str) -> bool {
@@ -90,12 +160,20 @@ impl AstFacts {
         self.while_loop_count > 0
     }
 
+    pub fn has_while_let_some(&self) -> bool {
+        self.while_let_some_count > 0
+    }
+
     pub fn has_loop(&self) -> bool {
         self.loop_count > 0
     }
 
     pub fn has_if(&self) -> bool {
         self.if_count > 0
+    }
+
+    pub fn has_if_let_some(&self) -> bool {
+        self.if_let_some_count > 0
     }
 
     pub fn has_match(&self) -> bool {
@@ -148,6 +226,13 @@ struct FactVisitor {
 
 impl<'ast> Visit<'ast> for FactVisitor {
     fn visit_local(&mut self, local: &'ast Local) {
+        collect_local_initializer(local, &mut self.facts);
+        collect_struct_pattern_fields(&local.pat, &mut self.facts.struct_pattern_fields);
+        collect_tuple_pattern_binding_counts(
+            &local.pat,
+            &mut self.facts.tuple_pattern_binding_counts,
+        );
+
         if pat_has_mut_binding(&local.pat) {
             self.facts.let_mut_count += 1;
         }
@@ -211,6 +296,11 @@ impl<'ast> Visit<'ast> for FactVisitor {
 
     fn visit_expr_while(&mut self, while_loop: &'ast ExprWhile) {
         self.facts.while_loop_count += 1;
+
+        if expr_is_let_some(while_loop.cond.as_ref()) {
+            self.facts.while_let_some_count += 1;
+        }
+
         visit::visit_expr_while(self, while_loop);
     }
 
@@ -221,6 +311,11 @@ impl<'ast> Visit<'ast> for FactVisitor {
 
     fn visit_expr_if(&mut self, if_expr: &'ast ExprIf) {
         self.facts.if_count += 1;
+
+        if expr_is_let_some(if_expr.cond.as_ref()) {
+            self.facts.if_let_some_count += 1;
+        }
+
         visit::visit_expr_if(self, if_expr);
     }
 
@@ -251,6 +346,122 @@ impl<'ast> Visit<'ast> for FactVisitor {
     }
 }
 
+fn collect_local_initializer(local: &Local, facts: &mut AstFacts) {
+    if !pat_is_simple_ident(&local.pat) {
+        return;
+    }
+
+    let Some(init) = &local.init else {
+        return;
+    };
+
+    facts.let_initializer_count += 1;
+    let expr = init.expr.as_ref();
+
+    if let Some(value) = expr_int_literal(expr) {
+        facts.let_initializer_int_values.push(value);
+    }
+
+    match expr {
+        Expr::Path(path) => facts.let_initializer_paths.push(path_to_string(&path.path)),
+        Expr::Call(call) => collect_let_call_initializer(call, facts),
+        Expr::Unary(unary) => collect_let_unary_initializer(unary, facts),
+        Expr::If(_) => facts.let_initializer_if_count += 1,
+        _ => {}
+    }
+}
+
+fn collect_let_call_initializer(call: &ExprCall, facts: &mut AstFacts) {
+    let Expr::Path(path) = call.func.as_ref() else {
+        return;
+    };
+
+    let call_path = path_to_string(&path.path);
+    facts.let_initializer_call_paths.push(call_path.clone());
+
+    for arg in &call.args {
+        if let Some(value) = expr_int_literal(arg) {
+            facts
+                .let_initializer_call_paths_with_int_args
+                .push((call_path.clone(), value));
+        }
+    }
+}
+
+fn collect_let_unary_initializer(unary: &ExprUnary, facts: &mut AstFacts) {
+    if !matches!(unary.op, UnOp::Deref(_)) {
+        return;
+    }
+
+    if let Expr::Path(path) = unary.expr.as_ref() {
+        facts
+            .let_initializer_deref_paths
+            .push(path_to_string(&path.path));
+    }
+}
+
+fn pat_is_simple_ident(pat: &Pat) -> bool {
+    match pat {
+        Pat::Ident(ident) => ident.ident != "_",
+        Pat::Type(typed) => pat_is_simple_ident(&typed.pat),
+        _ => false,
+    }
+}
+
+fn collect_struct_pattern_fields(pat: &Pat, fields: &mut Vec<(String, String)>) {
+    match pat {
+        Pat::Struct(struct_pat) => {
+            let path = path_to_string(&struct_pat.path);
+            for field in &struct_pat.fields {
+                if let Member::Named(name) = &field.member {
+                    fields.push((path.clone(), name.to_string()));
+                }
+                collect_struct_pattern_fields(&field.pat, fields);
+            }
+        }
+        Pat::Type(typed) => collect_struct_pattern_fields(&typed.pat, fields),
+        Pat::Tuple(tuple) => {
+            for elem in &tuple.elems {
+                collect_struct_pattern_fields(elem, fields);
+            }
+        }
+        Pat::TupleStruct(tuple_struct) => {
+            for elem in &tuple_struct.elems {
+                collect_struct_pattern_fields(elem, fields);
+            }
+        }
+        Pat::Reference(reference) => collect_struct_pattern_fields(&reference.pat, fields),
+        Pat::Slice(slice) => {
+            for elem in &slice.elems {
+                collect_struct_pattern_fields(elem, fields);
+            }
+        }
+        _ => {}
+    }
+}
+
+fn collect_tuple_pattern_binding_counts(pat: &Pat, counts: &mut Vec<usize>) {
+    match pat {
+        Pat::Tuple(tuple) => {
+            if !tuple.elems.is_empty() && tuple.elems.iter().all(pat_is_simple_ident) {
+                counts.push(tuple.elems.len());
+            }
+
+            for elem in &tuple.elems {
+                collect_tuple_pattern_binding_counts(elem, counts);
+            }
+        }
+        Pat::Type(typed) => collect_tuple_pattern_binding_counts(&typed.pat, counts),
+        Pat::Reference(reference) => collect_tuple_pattern_binding_counts(&reference.pat, counts),
+        Pat::Slice(slice) => {
+            for elem in &slice.elems {
+                collect_tuple_pattern_binding_counts(elem, counts);
+            }
+        }
+        _ => {}
+    }
+}
+
 fn pat_has_mut_binding(pat: &Pat) -> bool {
     match pat {
         Pat::Ident(ident) => ident.mutability.is_some(),
@@ -263,6 +474,22 @@ fn pat_has_mut_binding(pat: &Pat) -> bool {
             .any(|field| pat_has_mut_binding(&field.pat)),
         Pat::Reference(reference) => pat_has_mut_binding(&reference.pat),
         Pat::Slice(slice) => slice.elems.iter().any(pat_has_mut_binding),
+        _ => false,
+    }
+}
+
+fn expr_is_let_some(expr: &Expr) -> bool {
+    let Expr::Let(expr_let) = expr else {
+        return false;
+    };
+
+    pat_is_some_tuple(&expr_let.pat)
+}
+
+fn pat_is_some_tuple(pat: &Pat) -> bool {
+    match pat {
+        Pat::TupleStruct(tuple_struct) => path_to_string(&tuple_struct.path) == "Some",
+        Pat::Type(typed) => pat_is_some_tuple(&typed.pat),
         _ => false,
     }
 }

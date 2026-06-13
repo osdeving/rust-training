@@ -524,6 +524,17 @@ de alternancia, prefira duas regras ou uma regex sem esse caractere.
 
 ```text
 HasLetMut
+HasLetInitializer
+HasLetInitializerWithInt|42
+HasLetInitializerWithPath|LIMITE
+HasLetInitializerWithAnyPath
+HasLetInitializerWithCallPath|triplo
+HasLetInitializerWithCallPathWithIntArg|triplo|3
+HasLetInitializerWithDeref
+HasLetInitializerWithDerefPath|numero
+HasLetInitializerWithIf
+HasStructPatternField|Ponto|x
+HasTuplePatternBindingCount|2
 HasLetType|Vec
 HasCallPath|Vec::new
 HasCallPathWithIntArg|Vec::with_capacity|3
@@ -532,8 +543,10 @@ HasMacroCall|format
 HasForLoop
 HasForLoopByReference
 HasWhileLoop
+HasWhileLetSome
 HasLoop
 HasIf
+HasIfLetSome
 HasMatch
 HasFunction
 HasFunctionParamCount|2
