@@ -52,6 +52,7 @@
           <div class="menu-left">
             <button id="home-button" class="menu-button" type="button" data-tooltip="Voltar para a página inicial">Inicio</button>
             <button id="reload-catalog-button" class="menu-button reload-button" type="button" data-tooltip="Reler os Markdown de content/modules">Recarregar</button>
+            <button id="toolchain-status-button" class="toolchain-status-button" type="button" data-state="checking" data-tooltip="Status da toolchain Rust">Rust: checando</button>
             <span id="catalog-status" class="catalog-status" role="status" aria-live="polite"></span>
           </div>
           <div class="menu-popover">
@@ -64,6 +65,18 @@
             </div>
           </div>
         </nav>
+
+        <section id="toolchain-banner" class="toolchain-banner" hidden>
+          <div>
+            <strong id="toolchain-title">Toolchain Rust</strong>
+            <p id="toolchain-message"></p>
+            <code id="toolchain-command"></code>
+          </div>
+          <div class="toolchain-actions">
+            <a id="toolchain-install-link" href="https://rustup.rs" target="_blank" rel="noreferrer">Instalar Rust</a>
+            <button id="toolchain-refresh-button" class="secondary-button" type="button">Rechecar</button>
+          </div>
+        </section>
 
         <section id="home-view" class="home-view">
           <header class="home-header">

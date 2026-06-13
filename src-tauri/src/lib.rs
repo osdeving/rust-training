@@ -1,4 +1,4 @@
-use rust_training::{all_modules, evaluate, find_exercise};
+use rust_training::{all_modules, evaluate, find_exercise, rustc_status};
 use serde::Serialize;
 
 #[derive(Debug, Serialize)]
@@ -78,6 +78,15 @@ struct CompileReportDto {
     ok: bool,
     timed_out: bool,
     stderr: String,
+}
+
+#[derive(Debug, Serialize)]
+struct ToolchainStatusDto {
+    available: bool,
+    command: Option<String>,
+    version: Option<String>,
+    message: String,
+    install_url: String,
 }
 
 #[tauri::command]
@@ -186,6 +195,18 @@ fn check_answer(id: String, answer: String) -> Result<ValidationReportDto, Strin
     })
 }
 
+#[tauri::command]
+fn get_toolchain_status() -> ToolchainStatusDto {
+    let status = rustc_status();
+    ToolchainStatusDto {
+        available: status.available,
+        command: status.command,
+        version: status.version,
+        message: status.message,
+        install_url: status.install_url,
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -193,7 +214,8 @@ pub fn run() {
             get_catalog,
             get_exercise,
             get_hint,
-            check_answer
+            check_answer,
+            get_toolchain_status
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

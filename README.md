@@ -48,7 +48,9 @@ Baixe o instalador na pagina de GitHub Releases do projeto.
 
 O app desktop abre sem uma toolchain Rust instalada. Porem, a validacao de
 compilacao usa `rustc`; para o botao de verificar compilar respostas, instale
-Rust pelo `rustup`.
+Rust pelo `rustup`. O app checa a toolchain ao abrir, tenta localizar `rustc`
+no `PATH` e em caminhos comuns do `rustup`, e mostra um aviso quando precisar
+instalar ou reabrir o aplicativo.
 
 ### CLI via Cargo
 
@@ -581,7 +583,8 @@ prova comportamento.
 
 A checagem completa ainda depende de `rustc` instalado na maquina onde o app
 roda. Sem `rustc`, a compilacao falha, embora o app abra e mostre o catalogo
-normalmente.
+normalmente. Se o Rust tiver sido instalado enquanto o app estava aberto, clique
+em `Rechecar` ou feche e abra novamente.
 
 ## Referencias de empacotamento
 

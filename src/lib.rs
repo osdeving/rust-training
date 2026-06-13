@@ -8,6 +8,7 @@ mod embedded_content;
 
 pub use analyzer::evaluate;
 pub use catalog::{all_modules, find_exercise};
+pub use compiler::rustc_status;
 pub use domain::{
     CheckResult, CompileMode, CompileReport, Difficulty, Exercise, LearningResource,
     PatternGroupMode, Rule, RuleKind, SolutionGuide, TrainingModule, ValidationReport,

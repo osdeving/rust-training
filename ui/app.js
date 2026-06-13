@@ -27,6 +27,7 @@ const state = {
   },
   copyWarningTimer: null,
   catalogStatusTimer: null,
+  toolchain: null,
 };
 
 const elements = {
@@ -35,6 +36,13 @@ const elements = {
   homeButton: document.querySelector("#home-button"),
   reloadCatalogButton: document.querySelector("#reload-catalog-button"),
   catalogStatus: document.querySelector("#catalog-status"),
+  toolchainStatusButton: document.querySelector("#toolchain-status-button"),
+  toolchainBanner: document.querySelector("#toolchain-banner"),
+  toolchainTitle: document.querySelector("#toolchain-title"),
+  toolchainMessage: document.querySelector("#toolchain-message"),
+  toolchainCommand: document.querySelector("#toolchain-command"),
+  toolchainInstallLink: document.querySelector("#toolchain-install-link"),
+  toolchainRefreshButton: document.querySelector("#toolchain-refresh-button"),
   settingsButton: document.querySelector("#settings-button"),
   settingsMenu: document.querySelector("#settings-menu"),
   flagRubric: document.querySelector("#flag-rubric"),
@@ -90,6 +98,7 @@ async function boot() {
   syncSettingsControls();
 
   try {
+    await refreshToolchainStatus();
     state.catalog = await invoke("get_catalog");
     rebuildFlatExercises();
     renderCatalog();
@@ -131,6 +140,49 @@ async function reloadCatalog() {
     elements.reloadCatalogButton.disabled = false;
     elements.reloadCatalogButton.textContent = "Recarregar";
   }
+}
+
+async function refreshToolchainStatus(options = { showOk: false }) {
+  elements.toolchainStatusButton.dataset.state = "checking";
+  elements.toolchainStatusButton.textContent = "Rust: checando";
+  elements.toolchainStatusButton.disabled = true;
+
+  try {
+    const status = await invoke("get_toolchain_status");
+    state.toolchain = status;
+    renderToolchainStatus(status, options);
+  } catch (error) {
+    renderToolchainStatus(
+      {
+        available: false,
+        command: null,
+        version: null,
+        message: `Nao foi possivel checar a toolchain: ${String(error)}`,
+        install_url: "https://rustup.rs",
+      },
+      { showOk: true },
+    );
+  } finally {
+    elements.toolchainStatusButton.disabled = false;
+  }
+}
+
+function renderToolchainStatus(status, options = { showOk: false }) {
+  elements.toolchainStatusButton.dataset.state = status.available ? "ok" : "missing";
+  elements.toolchainStatusButton.textContent = status.available ? "Rust OK" : "Rust ausente";
+  elements.toolchainInstallLink.href = status.install_url || "https://rustup.rs";
+  elements.toolchainTitle.textContent = status.available
+    ? "Rust pronto para validar"
+    : "Rust nao encontrado";
+  elements.toolchainMessage.textContent = status.available
+    ? "A validacao por compilacao esta habilitada neste computador."
+    : status.message;
+
+  const detail = [status.version, status.command].filter(Boolean).join(" - ");
+  elements.toolchainCommand.textContent = detail;
+  elements.toolchainCommand.hidden = !detail;
+  elements.toolchainInstallLink.hidden = status.available;
+  elements.toolchainBanner.hidden = status.available && !options.showOk;
 }
 
 function loadProgress() {
@@ -376,6 +428,21 @@ elements.prevButton.addEventListener("click", () => moveExercise(-1));
 elements.nextButton.addEventListener("click", () => moveExercise(1));
 elements.homeButton.addEventListener("click", showHomeView);
 elements.reloadCatalogButton.addEventListener("click", reloadCatalog);
+elements.toolchainStatusButton.addEventListener("click", () => {
+  if (!state.toolchain) {
+    refreshToolchainStatus({ showOk: true });
+    return;
+  }
+
+  if (elements.toolchainBanner.hidden) {
+    renderToolchainStatus(state.toolchain, { showOk: true });
+  } else {
+    elements.toolchainBanner.hidden = true;
+  }
+});
+elements.toolchainRefreshButton.addEventListener("click", () =>
+  refreshToolchainStatus({ showOk: true }),
+);
 elements.settingsButton.addEventListener("click", () => {
   elements.settingsMenu.hidden = !elements.settingsMenu.hidden;
   elements.settingsButton.setAttribute("aria-expanded", String(!elements.settingsMenu.hidden));
@@ -800,6 +867,10 @@ function renderReport(report, options = { persist: true }) {
     : "Resultado salvo";
 
   if (report.compile) {
+    if (!report.compile.ok && report.compile.stderr.includes("rustc nao foi encontrado")) {
+      refreshToolchainStatus({ showOk: true });
+    }
+
     elements.resultOutput.append(
       renderCheckRow({
         ok: report.compile.ok,

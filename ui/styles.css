@@ -477,6 +477,39 @@ textarea:focus {
   background: #eef5f8;
 }
 
+.toolchain-status-button {
+  min-height: 30px;
+  border: 1px solid #d3dce5;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #47545c;
+  cursor: pointer;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.toolchain-status-button:hover {
+  background: #eef5f8;
+}
+
+.toolchain-status-button:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+.toolchain-status-button[data-state="ok"] {
+  border-color: #bbd7c7;
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.toolchain-status-button[data-state="missing"] {
+  border-color: #f0c36a;
+  background: var(--amber-soft);
+  color: #74521a;
+}
+
 .menu-button:disabled {
   cursor: progress;
   opacity: 0.62;
@@ -565,6 +598,69 @@ textarea:focus {
   flex: 1;
   min-height: 0;
   flex-direction: column;
+}
+
+.toolchain-banner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  border: 1px solid #efd08b;
+  border-radius: 8px;
+  background: #fff7e4;
+  padding: 10px 12px;
+}
+
+.toolchain-banner[hidden] {
+  display: none;
+}
+
+.toolchain-banner strong {
+  color: #5d4214;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.toolchain-banner p {
+  margin: 3px 0 0;
+  color: #4f422a;
+  font-size: 13px;
+  line-height: 1.38;
+}
+
+.toolchain-banner code {
+  display: inline-block;
+  margin-top: 6px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #503b17;
+  padding: 4px 6px;
+  font-family: "Cascadia Code", "Cascadia Mono", Consolas, monospace;
+  font-size: 12px;
+}
+
+.toolchain-actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.toolchain-actions a {
+  display: inline-grid;
+  min-height: 30px;
+  place-items: center;
+  border-radius: 6px;
+  background: var(--green);
+  color: #ffffff;
+  padding: 0 11px;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.toolchain-actions a:hover {
+  background: #185b3e;
 }
 
 .home-view[hidden],
