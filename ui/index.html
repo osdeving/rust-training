@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rust Training</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script type="module" src="./app.js"></script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="sidebar">
+        <header class="brand">
+          <div>
+            <p class="eyebrow">Rust Training</p>
+            <h1>Pratica guiada</h1>
+          </div>
+          <button id="clear-progress-button" class="icon-button" type="button" title="Limpar progresso" aria-label="Limpar progresso">
+            Limpar
+          </button>
+        </header>
+
+        <section class="dashboard" aria-label="Resumo do progresso">
+          <div class="progress-ring" aria-hidden="true">
+            <span id="progress-percent">0%</span>
+          </div>
+          <div class="dashboard-copy">
+            <strong id="progress-count">0 de 0 concluidos</strong>
+            <span id="progress-detail">Nenhum exercicio aprovado ainda.</span>
+          </div>
+        </section>
+
+        <section class="organizer">
+          <label for="organization-select">Organizar</label>
+          <select id="organization-select">
+            <option value="natural">Progressao natural</option>
+            <option value="module">Assunto</option>
+            <option value="difficulty">Dificuldade</option>
+          </select>
+        </section>
+
+        <section class="search-box">
+          <label for="search-input">Buscar</label>
+          <input id="search-input" type="search" placeholder="match, HashMap, arquivo..." />
+        </section>
+
+        <nav id="exercise-list" class="exercise-list" aria-label="Exercicios"></nav>
+      </aside>
+
+      <section class="workspace">
+        <nav class="app-menu" aria-label="Menu do aplicativo">
+          <div class="menu-left">
+            <button id="home-button" class="menu-button" type="button" data-tooltip="Voltar para a página inicial">Inicio</button>
+            <button id="reload-catalog-button" class="menu-button reload-button" type="button" data-tooltip="Reler os Markdown de content/modules">Recarregar</button>
+            <span id="catalog-status" class="catalog-status" role="status" aria-live="polite"></span>
+          </div>
+          <div class="menu-popover">
+            <button id="settings-button" class="menu-button" type="button" aria-expanded="false" data-tooltip="Ligar e desligar recursos da UI">Preferencias</button>
+            <div id="settings-menu" class="settings-menu" hidden>
+              <label><input id="flag-rubric" type="checkbox" /> Checklist visivel</label>
+              <label><input id="flag-history" type="checkbox" /> Historico de tentativas</label>
+              <label><input id="flag-review" type="checkbox" /> Modo revisao</label>
+              <label><input id="flag-tooltips" type="checkbox" /> Tooltips</label>
+            </div>
+          </div>
+        </nav>
+
+        <section id="home-view" class="home-view">
+          <header class="home-header">
+            <div>
+              <p class="module-label">Trilha Rust</p>
+              <h2>Escolha onde praticar</h2>
+              <p>Exercicios curtos para praticar sintaxe, tipos, fluxo, funcoes, colecoes, erros e arquivos.</p>
+            </div>
+            <button id="start-button" class="primary-button" type="button">Comecar</button>
+          </header>
+
+          <section class="home-stats" aria-label="Resumo da trilha">
+            <article>
+              <strong id="home-total">0</strong>
+              <span>exercicios</span>
+            </article>
+            <article>
+              <strong id="home-modules">0</strong>
+              <span>modulos</span>
+            </article>
+            <article>
+              <strong id="home-completed">0</strong>
+              <span>concluidos</span>
+            </article>
+          </section>
+
+          <section id="module-cards" class="module-cards" aria-label="Modulos"></section>
+        </section>
+
+        <section id="exercise-view" class="exercise-view" hidden>
+          <header class="topbar">
+            <button id="prev-button" class="nav-button" type="button">Anterior</button>
+            <div class="topbar-center">
+              <p id="module-label" class="module-label"></p>
+              <h2 id="exercise-title"></h2>
+              <p id="exercise-position" class="exercise-position"></p>
+            </div>
+            <button id="next-button" class="nav-button" type="button">Proximo</button>
+          </header>
+
+          <section class="prompt-band">
+            <p id="exercise-prompt" class="prompt"></p>
+            <div class="prompt-actions">
+              <button id="solution-button" class="secondary-button" type="button">Solucao guiada</button>
+              <button id="hint-button" class="secondary-button" type="button">Dica</button>
+            </div>
+          </section>
+
+          <section id="hint-panel" class="hint-panel" hidden></section>
+
+          <section id="rubric-panel" class="rubric-panel" hidden></section>
+
+          <section class="editor-layout">
+            <div class="editor-pane">
+              <div class="pane-header">
+                <div>
+                  <span>Resposta</span>
+                  <small id="save-state-label">Salvo localmente</small>
+                </div>
+                <button id="check-button" class="primary-button" type="button">Verificar</button>
+              </div>
+              <div class="code-editor">
+                <pre id="highlight-layer" aria-hidden="true"></pre>
+                <textarea id="answer-input" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="Escreva sua resposta em Rust aqui..."></textarea>
+              </div>
+            </div>
+
+            <div class="result-pane">
+              <div class="pane-header">
+                <div>
+                  <span>Resultado</span>
+                  <small id="last-run-label">Aguardando primeira verificacao</small>
+                </div>
+                <span id="status-badge" class="status-badge">Aguardando</span>
+              </div>
+              <div id="result-output" class="result-output"></div>
+              <section id="history-panel" class="history-panel" hidden></section>
+            </div>
+          </section>
+        </section>
+      </section>
+
+      <div id="solution-modal" class="modal-backdrop" hidden>
+        <section class="solution-modal" role="dialog" aria-modal="true" aria-labelledby="solution-title">
+          <header class="modal-header">
+            <div>
+              <p class="module-label">Mini-doc</p>
+              <h3 id="solution-title">Solucao guiada</h3>
+            </div>
+            <button id="close-solution-button" class="icon-button" type="button" aria-label="Fechar solucao guiada">Fechar</button>
+          </header>
+          <div id="solution-content" class="solution-content"></div>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>

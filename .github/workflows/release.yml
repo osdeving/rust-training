@@ -1,0 +1,79 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-desktop:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            artifact_name: rust-training-windows
+          - os: macos-latest
+            artifact_name: rust-training-macos
+          - os: ubuntu-22.04
+            artifact_name: rust-training-linux
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Linux Tauri dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            patchelf
+
+      - name: Install Tauri CLI
+        run: cargo install tauri-cli --version "^2" --locked
+
+      - name: Test
+        run: cargo test --workspace
+
+      - name: Build desktop app
+        run: cargo tauri build
+
+      - name: Upload desktop bundles
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          if-no-files-found: warn
+          path: |
+            target/release/bundle/**
+            src-tauri/target/release/bundle/**
+
+      - name: Attach bundles to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          fail_on_unmatched_files: false
+          files: |
+            target/release/bundle/**/*.msi
+            target/release/bundle/**/*.exe
+            target/release/bundle/**/*.dmg
+            target/release/bundle/**/*.app.tar.gz
+            target/release/bundle/**/*.deb
+            target/release/bundle/**/*.rpm
+            target/release/bundle/**/*.AppImage
+            src-tauri/target/release/bundle/**/*.msi
+            src-tauri/target/release/bundle/**/*.exe
+            src-tauri/target/release/bundle/**/*.dmg
+            src-tauri/target/release/bundle/**/*.app.tar.gz
+            src-tauri/target/release/bundle/**/*.deb
+            src-tauri/target/release/bundle/**/*.rpm
+            src-tauri/target/release/bundle/**/*.AppImage

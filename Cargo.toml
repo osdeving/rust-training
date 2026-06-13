@@ -1,0 +1,28 @@
+[package]
+name = "rust-training"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+description = "Rust practice app for memorizing Rust syntax and constructions through short exercises."
+license = "MIT"
+readme = "README.md"
+documentation = "https://docs.rs/rust-training"
+keywords = ["rust", "training", "exercises", "cli", "tauri"]
+categories = ["command-line-utilities", "development-tools"]
+include = [
+    "src/**",
+    "content/**",
+    "README.md",
+    "LICENSE",
+    "Cargo.toml",
+]
+
+[workspace]
+members = [".", "src-tauri"]
+default-members = ["."]
+resolver = "3"
+
+[dependencies]
+regex = "1"
+syn = { version = "2", features = ["full", "visit"] }
+tempfile = "3"
